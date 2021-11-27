@@ -6,8 +6,8 @@ import keyboard
 import numpy as np
 windowcap = WindowCapture("Trackmania")
 
-recording=True
-scaledw=40
+recording=False
+scaledw=160
 scaledh=int(9/16*scaledw)
 saved_actions=np.zeros(4+scaledw*scaledh) #= [2,2,2,2]#np.zeros(shape=[0,4],dtype=np.int)
 
@@ -15,7 +15,9 @@ while(True):
     screenshot = windowcap.get_screenshot()
     resized = cv.resize(screenshot,(scaledw,scaledh),interpolation=cv.INTER_AREA)
     grayscale = cv.cvtColor(resized,cv.COLOR_BGR2GRAY)
-    cv.imshow("screen grab",grayscale)
+    flat = np.reshape(grayscale,(scaledw*scaledh))
+    restored = np.reshape(flat,(scaledh,scaledw))
+    cv.imshow("screen grab",restored)
     if recording:
         action = [int(keyboard.is_pressed('w')),int(keyboard.is_pressed('a')),int(keyboard.is_pressed('s')),int(keyboard.is_pressed('d'))]
         if(abs(np.max(action))>1):
@@ -36,8 +38,7 @@ while(True):
     if cv.waitKey(1) == ord('q') or keyboard.is_pressed("q"):
         cv.destroyAllWindows()
         break
-print(saved_actions[1:])
-np.save("data.npy",saved_actions[1:])
+np.save("data.npy",saved_actions[1:])#there is a slice because the first element is just all zeros, which is how I initialized the array so I could use vertical stack without worrying about trying to stack on top of nothing, which produces an error
 print(np.load("data.npy"))
 
 
